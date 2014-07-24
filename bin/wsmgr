@@ -1,71 +1,15 @@
 #!/usr/bin/env python
 
-import os
-from os.path import abspath, dirname, join
-import signal
-import subprocess
+from os.path import abspath, dirname
 import sys
 
-BASEDIR = abspath(dirname(__file__) + '/..')
-
-sys.path.insert(0, BASEDIR)
-from etc.instances import INSTANCE_MAP 
+sys.path.insert(0, abspath(dirname(__file__) + '/..'))
+import stampede.run as entry_point
 
 
-def usage():
-    """Display usage summary."""
-    pass
-
-
-def _call_os(os_args):
-    """Run an OS command."""
-    try:
-        subprocess.check_call(os_args)
-    except subprocess.CalledProcessError as err:
-        return None
-    return True
-
-
-def _pidfile(instance):
-    """Get path for the instance's pidfile."""
-    return join(BASEDIR, 'var', 'run', 'wsgi%s.pid' % instance)
-
-
-def _start(instance):
-    """Start an instance."""
-    cfg = INSTANCE_MAP[instance]
-    server_args = {
-            'bind': '0.0.0.0:4%s2' % instance,
-            'chdir': cfg['app_basedir'],
-            'workers': cfg['workers'],
-            'pid': _pidfile(instance),
-            'name': 'wsgi%s' % instance,
-            }
-    os_args = [cfg['gunicorn_binary'], cfg['app_gunicorn_spec'], '--daemon']
-    for k,v in server_args.items():
-        os_args.append('--%s=%s' % (k,v))
-    was_success = _call_os(os_args)
-    return was_success
-
-
-def _stop(instance):
-    """Stop an instance."""
-    try:
-        with open(_pidfile(instance), 'r') as f:
-            pid = f.read()
-    except IOError as err:
-       raise
-    os.kill(int(pid), signal.SIGTERM)
-
-
-def run(*args):
-
-    op, instances = (sys.argv[1], sys.argv[2:])
-
-    if op in ['stop', 'start', 'status', 'restart', 'kill']:
-        func = getattr(sys.modules[__name__], '_%s' % op)
-        for instance in instances:
-            func(instance)
+def run():
+    """Pass control to the application."""
+    entry_point.run()
 
 
 if __name__ == '__main__':

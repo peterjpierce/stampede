@@ -1,0 +1,24 @@
+---
+version: 1
+disable_existing_loggers: false
+
+formatters:
+  basic:
+    format: '%(asctime)s [%(process)5d] (%(name)s) %(levelname)s - %(message)s'
+
+handlers:
+  logfile:
+    class: logging.FileHandler
+    filename: module_context_populates_this
+    level: DEBUG
+    formatter: basic
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: basic
+    stream: ext://sys.stdout
+
+root:
+  # most verbose here, let handlers be the filters individually
+  level: DEBUG
+  handlers: [logfile, console]
