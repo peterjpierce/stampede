@@ -20,7 +20,9 @@ class ArgsWrapper():
     def parse(self):
         """Parse the command line and return results."""
         args = self.parser.parse_args()
-        if args.verbose:
+        if args.task in ['status',]:
+            console_level = 'ERROR'
+        elif args.verbose:
             console_level = 'DEBUG'
         elif args.quiet:
             console_level = 'ERROR'
@@ -32,7 +34,7 @@ class ArgsWrapper():
         """Initialize with arguments."""
         self.parser.add_argument(
                     'task', help='operation to perform',
-                    choices=['stop', 'start', 'status', 'restart', 'kill'])
+                    choices=['stop', 'start', 'status', 'restart'])
         self.parser.add_argument(
                 'instances', metavar='instance', nargs='+', help='server numbers')
         exclusive = self.parser.add_mutually_exclusive_group()
