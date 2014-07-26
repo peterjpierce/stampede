@@ -5,7 +5,7 @@ from stampede import context, errors, servers
 
 def run():
 
-    pidfile_dir, config, instance_map, args = context.setup()
+    args, instance_map, pidfile_dir = context.setup()
     log = logging.getLogger(__name__)
 
     log.debug('received task "%s" for instances %s' % (args.task, args.instances))

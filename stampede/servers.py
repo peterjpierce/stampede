@@ -41,10 +41,6 @@ class GunicornServer():
     def name(self):
         return 'wsgi%s' % self.instance
 
-    @property
-    def port(self):
-        return '4%03d2' % int(self.instance)
-
     def start(self):
         """Start an instance."""
         if self.running:
@@ -52,9 +48,9 @@ class GunicornServer():
 
         else:
             server_args = {
-                    'bind': '0.0.0.0:%s' % self.port,
+                    'bind': '%s:%s' % (self.cfg['ip_address'], self.cfg['port']),
                     'chdir': self.cfg['app_basedir'],
-                    'workers': self.cfg['worker_count'],
+                    'workers': self.cfg['workers_count'],
                     'pid': self.pidfile,
                     'name': self.name,
                     }

@@ -3,9 +3,8 @@ import datetime
 import logging
 import logging.config
 import os
-import sys
 
-from stampede import util
+from stampede import constants, util
 
 COLUMNS = 140
 
@@ -49,15 +48,28 @@ def setup():
     args_parser = ArgsWrapper()
     args, console_logging_level = args_parser.parse()
 
-    # context and config
+    # context
     os.environ['COLUMNS'] = str(COLUMNS)
     basedir = os.path.abspath('%s/..' % os.path.dirname(__file__))
-    config = util.read_yaml('%s/etc/settings.yml' % basedir)
-
     pidfile_dir = '%s/var/run' % basedir
     util.make_dir(pidfile_dir)
 
-    # establish logging
+    # instance map
+    instance_map = util.read_yaml('%s/etc/instances.yml' % basedir)
+    for inst_num, cfg in instance_map.items():
+        # normalize keys to be strings
+        if not isinstance(inst_num, str):
+            instance_map[str(inst_num)] = cfg
+            del instance_map[inst_num]
+        # apply defaults where needed
+        if not 'ip_address' in cfg:
+            cfg['ip_address'] = constants.DEFAULT_IP_ADDRESS
+        if not 'port' in cfg:
+            cfg['port'] = constants.DEFAULT_PORT_PATTERN % int(inst_num)
+        if not 'workers_count' in cfg:
+            cfg['workers_count'] = constants.DEFAULT_WORKERS_COUNT
+
+    # logging
     year = datetime.datetime.now().strftime('%Y')
     logfile = '%s/var/log/stampede.log.%s' % (basedir, year)
     logconfig = util.read_yaml('%s/etc/logging.yml' % basedir)
@@ -66,8 +78,4 @@ def setup():
     util.make_parent_dir(logfile)
     logging.config.dictConfig(logconfig)
 
-    # final pieces
-    sys.path.insert(0, basedir)
-    from etc.instances import INSTANCE_MAP
-
-    return (pidfile_dir, config, INSTANCE_MAP, args)
+    return (args, instance_map, pidfile_dir)
