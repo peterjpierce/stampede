@@ -17,7 +17,7 @@ Stampede has been tested on FreeBSD and Linux and requires two Python libraries:
 
 Untar this project into the folder (and with the user) of your choice.
 
-Good practice suggests you set up a dedicated virtual environment to accomplish this. Many teams will create this enviroment under an ```env/``` sub-directory at the top of your newly untarred project directory.  When ready, you can install the Stampede dependencies using ```pip install setup/requirements.txt```
+Good practice suggests you set up a dedicated virtual environment to accomplish this. Many teams will create this enviroment under an ```env/``` sub-directory at the top of your newly untarred project directory.  When ready, you can install the Stampede dependencies using ```pip install -r setup/requirements.txt```
 
 Your application's own environment will remain isolated from the one you establish for Stampede.
 

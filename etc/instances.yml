@@ -10,7 +10,7 @@
 #   port
 #   workers_count
 #
-# If omitted, values that conform to the defaults will # be used.  The default
+# If omitted, values that conform to the defaults will be used.  The default
 # convention is to use 3-digit instances.
 
 100:
