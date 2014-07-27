@@ -10,10 +10,12 @@ log = logging.getLogger(__name__)
 
 PAUSE_SECONDS = 3
 MAX_TRIES = 5
+PIDFILE_DIR = '%s/var/run' % os.path.abspath('%s/..' % os.path.dirname(__file__))
+
 
 class GunicornServer():
 
-    def __init__(self, instance, instance_map, pidfile_dir):
+    def __init__(self, instance, instance_map):
         """Arg instance is the unique instance number, like 100.
 
        Current convention is that instance numbers are three digits
@@ -26,9 +28,8 @@ class GunicornServer():
             raise errors.InvalidServerError(err)
 
         self.instance = instance
-        self.pidfile = os.path.join(pidfile_dir, '%s.pid' % self.name)
-        pid = self._read_pidfile()
-        self.process = psutil.Process(pid) if pid else None
+        self.pidfile = PIDFile(instance)
+        self.process = psutil.Process(self.pidfile.pid) if self.pidfile.pid else None
 
     @property
     def running(self):
@@ -51,7 +52,7 @@ class GunicornServer():
                     'bind': '%s:%s' % (self.cfg['ip_address'], self.cfg['port']),
                     'chdir': self.cfg['app_basedir'],
                     'workers': self.cfg['workers_count'],
-                    'pid': self.pidfile,
+                    'pid': self.pidfile.path,
                     'name': self.name,
                     }
 
@@ -112,11 +113,37 @@ class GunicornServer():
         self.stop()
         self.start()
 
+
+class PIDFile():
+    """Abstraction around and utilities for PID files."""
+
+    def __init__(self, instance_num):
+        self.instance = int(instance_num)
+
+    @property
+    def path(self):
+        return os.path.join(PIDFILE_DIR, 'wsgi%03d.pid' % self.instance)
+
+    @property
+    def basename(self):
+        return os.path.basename(self.path)
+
+    @property
+    def pid(self):
+        value = self._read_pidfile()
+        if value:
+            if psutil.pid_exists(value):
+                return value
+            else:
+                log.warn('removing stale pidfile %s (%d)' % (self.basename, value))
+                os.remove(self.path)
+        return None
+
     def _read_pidfile(self):
-        if not os.path.exists(self.pidfile):
+        if not os.path.exists(self.path):
             return None
         try:
-            with open(self.pidfile, 'r') as f:
+            with open(self.path, 'r') as f:
                 pid = f.read()
         except IOError as err:
            raise

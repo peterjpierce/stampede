@@ -5,7 +5,7 @@ from stampede import context, errors, servers
 
 def run():
 
-    args, instance_map, pidfile_dir = context.setup()
+    args, instance_map = context.setup()
     log = logging.getLogger(__name__)
 
     log.debug('received task "%s" for instances %s' % (args.task, args.instances))
@@ -14,7 +14,7 @@ def run():
     for instance in sorted(instances):
 
         try:
-            server = servers.GunicornServer(instance, instance_map, pidfile_dir)
+            server = servers.GunicornServer(instance, instance_map)
         except errors.InvalidServerError as err:
             log.warn('instance "%s" is not valid, skipping' % instance)
             continue

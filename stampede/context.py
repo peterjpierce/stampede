@@ -51,8 +51,7 @@ def setup():
     # context
     os.environ['COLUMNS'] = str(COLUMNS)
     basedir = os.path.abspath('%s/..' % os.path.dirname(__file__))
-    pidfile_dir = '%s/var/run' % basedir
-    util.make_dir(pidfile_dir)
+    util.make_dir('%s/var/run' % basedir)
 
     # instance map
     instance_map = util.read_yaml('%s/etc/instances.yml' % basedir)
@@ -72,10 +71,10 @@ def setup():
     # logging
     year = datetime.datetime.now().strftime('%Y')
     logfile = '%s/var/log/stampede.log.%s' % (basedir, year)
-    logconfig = util.read_yaml('%s/etc/logging.yml' % basedir)
+    logconfig = dict(constants.LOGGING)
     logconfig['handlers']['logfile']['filename'] = logfile
     logconfig['handlers']['console']['level'] = console_logging_level
     util.make_parent_dir(logfile)
     logging.config.dictConfig(logconfig)
 
-    return (args, instance_map, pidfile_dir)
+    return (args, instance_map)
