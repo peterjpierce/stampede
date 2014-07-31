@@ -10,6 +10,7 @@ log = logging.getLogger(__name__)
 
 PAUSE_SECONDS = 3
 MAX_TRIES = 5
+BASEDIR = os.path.abspath('%s/..' % os.path.dirname(__file__))
 PIDFILE_DIR = '%s/var/run' % os.path.abspath('%s/..' % os.path.dirname(__file__))
 
 
@@ -42,6 +43,10 @@ class GunicornServer():
     def name(self):
         return 'wsgi%s' % self.instance
 
+    @property
+    def server_log(self):
+        return os.path.join(BASEDIR, 'var', 'log', '%s.log' % self.name)
+
     def start(self):
         """Start an instance."""
         if self.running:
@@ -54,6 +59,7 @@ class GunicornServer():
                     'workers': self.cfg['workers_count'],
                     'pid': self.pidfile.path,
                     'name': self.name,
+                    'log-file': self.server_log,
                     }
 
             os_args = [
@@ -122,7 +128,7 @@ class PIDFile():
 
     @property
     def path(self):
-        return os.path.join(PIDFILE_DIR, 'wsgi%03d.pid' % self.instance)
+        return os.path.join(BASEDIR, 'var', 'run', 'wsgi%03d.pid' % self.instance)
 
     @property
     def basename(self):
