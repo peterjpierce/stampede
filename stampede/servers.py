@@ -11,7 +11,6 @@ log = logging.getLogger(__name__)
 PAUSE_SECONDS = 3
 MAX_TRIES = 5
 BASEDIR = os.path.abspath('%s/..' % os.path.dirname(__file__))
-PIDFILE_DIR = '%s/var/run' % os.path.abspath('%s/..' % os.path.dirname(__file__))
 
 
 class GunicornServer():
