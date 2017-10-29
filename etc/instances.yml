@@ -8,17 +8,18 @@
 #
 #   ip_address
 #   port
+#   timeout_secs
 #   workers_count
 #
 # If omitted, values that conform to the defaults will be used.  The default
 # convention is to use 3-digit instances.
 
-100:
-  app_basedir: /home/peter/git/webfiles
-  app_gunicorn_spec: 'webfiles:app'
-  gunicorn_binary: /home/peter/pyenv/webfiles/bin/gunicorn
+'100':
+  app_basedir: /opt/truenorth/wsgi_apps/stocks-web/
+  app_gunicorn_spec: 'stocksweb.stocksweb.wsgi' # Django example
+  gunicorn_binary: /opt/truenorth/wsgi_apps/stocks-web/env/bin/gunicorn
 
-'400':
-  app_basedir: /home/ppierce/git/video_credentials
-  app_gunicorn_spec: 'incredible:app'
-  gunicorn_binary: /home/ppierce/pyenv/vcreds/bin/gunicorn
+'101'
+  app_basedir: /home/peter/git/webfiles
+  app_gunicorn_spec: 'incredible:app' # Flask example
+  gunicorn_binary: /home/peter/env/webfiles/bin/gunicorn

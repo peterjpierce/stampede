@@ -3,7 +3,7 @@ import os
 import psutil
 import time
 
-from stampede import errors
+from stampede import constants, errors
 
 log = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ MAX_TRIES = 5
 BASEDIR = os.path.abspath('%s/..' % os.path.dirname(__file__))
 
 
-class GunicornServer():
+class GunicornServer:
 
     def __init__(self, instance, instance_map):
         """Arg instance is the unique instance number, like 100.
@@ -53,22 +53,23 @@ class GunicornServer():
 
         else:
             server_args = {
-                    'bind': '%s:%s' % (self.cfg['ip_address'], self.cfg['port']),
-                    'chdir': self.cfg['app_basedir'],
-                    'workers': self.cfg['workers_count'],
-                    'pid': self.pidfile.path,
-                    'name': self.name,
-                    'log-file': self.server_log,
-                    }
+                'bind': '%s:%s' % (self.cfg['ip_address'], self.cfg['port']),
+                'chdir': self.cfg['app_basedir'],
+                'workers': self.cfg['workers_count'],
+                'timeout': self.cfg.get('timeout_secs', constants.DEFAULT_TIMEOUT),
+                'pid': self.pidfile.path,
+                'name': self.name,
+                'log-file': self.server_log,
+            }
 
             os_args = [
-                    self.cfg['gunicorn_binary'],
-                    self.cfg['app_gunicorn_spec'],
-                    '--daemon',
-                    ]
+                self.cfg['gunicorn_binary'],
+                self.cfg['app_gunicorn_spec'],
+                '--daemon',
+            ]
 
-            for k,v in server_args.items():
-                os_args.append('--%s=%s' % (k,v))
+            for k, v in server_args.items():
+                os_args.append('--%s=%s' % (k, v))
 
             log.info('starting %s' % self.name)
             log.debug('args are: %s' % str(os_args))
@@ -119,7 +120,7 @@ class GunicornServer():
         self.start()
 
 
-class PIDFile():
+class PIDFile:
     """Abstraction around and utilities for PID files."""
 
     def __init__(self, instance_num):
@@ -140,7 +141,7 @@ class PIDFile():
             if psutil.pid_exists(value):
                 return value
             else:
-                log.warn('removing stale pidfile %s (%d)' % (self.basename, value))
+                log.warning('removing stale pidfile %s (%d)' % (self.basename, value))
                 os.remove(self.path)
         return None
 
@@ -150,6 +151,6 @@ class PIDFile():
         try:
             with open(self.path, 'r') as f:
                 pid = f.read()
-        except IOError as err:
-           raise
+        except IOError:
+            raise
         return int(pid)

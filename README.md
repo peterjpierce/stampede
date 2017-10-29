@@ -17,7 +17,7 @@ Stampede has been tested on FreeBSD and Linux and requires two Python libraries:
 
 Untar this project into the folder (and with the user) of your choice.
 
-Good practice suggests you set up a dedicated virtual environment to accomplish this. Many teams will create this enviroment under an ```env/``` sub-directory at the top of your newly untarred project directory.  When ready, you can install the Stampede dependencies using ```pip install -r setup/requirements.txt```
+Good practice suggests you set up a dedicated virtual environment to accomplish this. Many teams will create this enviroment under an ```env/``` sub-directory at the top of your newly untarred project directory.  When ready, you can install the Stampede dependencies using ```pip install -r requirements.txt```
 
 Your application's own environment will remain isolated from the one you establish for Stampede.
 
@@ -29,13 +29,18 @@ Add Gunicorn to your app's virtual environment.
 
 ### Step 3: Configure Stampede
 
-Edit Stampede's ```etc/instances.yml``` for each instance you will be running. An example is provided, that looks like this:
+Edit Stampede's ```etc/site.env``` as needed to setup your preferred environment. The example shows
+version-specific settings for PostgreSQL and Oracle. (You may need to tweak ```etc/app.env``` if you
+introduce other settings.)
+
+Edit Stampede's ```etc/instances.yml``` for each instance you will be running. Two examples are
+provided (one for Django, one for Flask), that look like this:
 
 ```
-100:
-  app_basedir: /home/peter/git/webfiles
-  app_gunicorn_spec: 'webfiles:app'
-  gunicorn_binary: /home/peter/pyenv/webfiles/bin/gunicorn
+'100':
+  app_basedir: /opt/truenorth/wsgi_apps/stocks-web/
+  app_gunicorn_spec: 'stocksweb.stocksweb.wsgi' # Django example
+  gunicorn_binary: /opt/truenorth/wsgi_apps/stocks-web/env/bin/gunicorn
 ```
 
 The minimal configuration requires just these three settings per Gunicorn server.  (Note that by installing gunicorn in your app's virtual env, your gunicorn_binary setting can be used to infer and activate the correct environment). For now, please use three-digit instance numbers.
@@ -43,6 +48,7 @@ The minimal configuration requires just these three settings per Gunicorn server
 You may also specify these items, but if not, reasonable defaults will be used:
 + ip_address (default: 0.0.0.0, all interfaces)
 + port (default: 4xxx2, where xxx is the instance number; e.g., instance 100 listens on port 41002)
++ timeout_secs (default: 30 seconds which is also the default for Gunicorn)
 + workers_count (default: # of CPUs * 2 + 1, per Gunicorn's recommendations)
 
 ## Running Stampede
